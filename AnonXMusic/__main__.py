@@ -18,67 +18,79 @@ from config import BANNED_USERS
 # Define a function to run the server URL hitting in a separate thread
 def run_server_url():
     while True:
-        hit_server_url()
+        try:
+            hit_server_url()
+        except Exception as e:
+            LOGGER(__name__).error(f"Error hitting server URL: {str(e)}")
         # Sleep for a specified duration before hitting the server URL again
         time.sleep(13 * 60)  # Sleep for 13 minutes
 
-
-
-
 async def init():
-    if (
-        not config.STRING1
-        and not config.STRING2
-        and not config.STRING3
-        and not config.STRING4
-        and not config.STRING5
-    ):
-        LOGGER(__name__).error("Assistant client variables not defined, exiting...")
-        exit()
-    await sudo()
     try:
-        users = await get_gbanned()
-        for user_id in users:
-            BANNED_USERS.add(user_id)
-        users = await get_banned_users()
-        for user_id in users:
-            BANNED_USERS.add(user_id)
-    except:
-        pass
-    await app.start()
-    for all_module in ALL_MODULES:
-        importlib.import_module("AnonXMusic.plugins" + all_module)
-    LOGGER("AnonXMusic.plugins").info("Successfully Imported Modules...")
-    await userbot.start()
-    await Anony.start()
-    try:
-        await Anony.stream_call("https://te.legra.ph/file/29f784eb49d230ab62e9e.mp4")
-    except NoActiveGroupCall:
-        LOGGER("AnonXMusic").error(
-            "Please turn on the videochat of your log group\channel.\n\nStopping Bot..."
-        )
-        exit()
-    except:
-        pass
-    await Anony.decorators()
-    LOGGER("AnonXMusic").info(
-        "\x41\x6e\x6f\x6e\x58\x20\x4d\x75\x73\x69\x63\x20\x42\x6f\x74\x20\x53\x74\x61\x72\x74\x65\x64\x20\x53\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x2e\n\n\x44\x6f\x6e'\x74\x20\x66\x6f\x72\x67\x65\x74\x20\x74\x6f\x20\x76\x69\x73\x69\x74\x20\x40\x46\x61\x6c\x6c\x65\x6e\x41\x73\x73\x6f\x63\x69\x61\x74\x69\x6f\x6e"
-    )
-    await idle()
-    await app.stop()
-    await userbot.stop()
-    LOGGER("AnonXMusic").info("Stopping AnonX Music Bot...")
-
+        if (
+            not config.STRING1
+            and not config.STRING2
+            and not config.STRING3
+            and not config.STRING4
+            and not config.STRING5
+        ):
+            LOGGER(__name__).error("Assistant client variables not defined, exiting...")
+            return
+        
+        await sudo()
+        
+        try:
+            users = await get_gbanned()
+            for user_id in users:
+                BANNED_USERS.add(user_id)
+            users = await get_banned_users()
+            for user_id in users:
+                BANNED_USERS.add(user_id)
+        except Exception as e:
+            LOGGER(__name__).error(f"Error loading banned users: {str(e)}")
+        
+        await app.start()
+        
+        for all_module in ALL_MODULES:
+            importlib.import_module("AnonXMusic.plugins" + all_module)
+        
+        LOGGER("AnonXMusic.plugins").info("Successfully Imported Modules...")
+        
+        await userbot.start()
+        await Anony.start()
+        
+        try:
+            await Anony.stream_call("https://te.legra.ph/file/29f784eb49d230ab62e9e.mp4")
+        except NoActiveGroupCall:
+            LOGGER("AnonXMusic").error(
+                "Please turn on the videochat of your log group/channel.\n\nStopping Bot..."
+            )
+        except Exception as e:
+            LOGGER("AnonXMusic").error(f"Error starting stream call: {str(e)}")
+        
+        await Anony.decorators()
+        LOGGER("AnonXMusic").info("AnonX Music Bot Started Successfully.")
+        
+        await idle()
+        
+    except Exception as e:
+        LOGGER(__name__).error(f"Error in init function: {str(e)}")
+        
+    finally:
+        await app.stop()
+        await userbot.stop()
+        LOGGER("AnonXMusic").info("Stopping AnonX Music Bot...")
 
 if __name__ == "__main__":
     # Start the server URL hitting function in a separate thread
     server_url_thread = threading.Thread(target=run_server_url)
     server_url_thread.start()
 
- # Start the server in a separate thread
+    # Start the server in a separate thread
     server_thread = threading.Thread(target=server)
     server_thread.start()
     
     asyncio.get_event_loop().run_until_complete(init())
+    
     # Wait for the server thread to finish
     server_thread.join()
