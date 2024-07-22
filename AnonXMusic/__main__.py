@@ -3,7 +3,7 @@ import importlib
 
 from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
-from main.server import server  # Import the server function from server.py
+from AnonXMusic.server import server  # Import the server function from server.py
 import config
 from cron import hit_server_url
 
