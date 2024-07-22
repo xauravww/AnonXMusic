@@ -5,6 +5,8 @@ from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
 
 import config
+from cron import hit_server_url
+
 from AnonXMusic import LOGGER, app, userbot
 from AnonXMusic.core.call import Anony
 from AnonXMusic.misc import sudo
@@ -12,6 +14,12 @@ from AnonXMusic.plugins import ALL_MODULES
 from AnonXMusic.utils.database import get_banned_users, get_gbanned
 from config import BANNED_USERS
 
+# Define a function to run the server URL hitting in a separate thread
+def run_server_url():
+    while True:
+        hit_server_url()
+        # Sleep for a specified duration before hitting the server URL again
+        time.sleep(13 * 60)  # Sleep for 13 minutes
 
 async def init():
     if (
